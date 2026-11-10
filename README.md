@@ -109,7 +109,8 @@ Conservá las demás entradas. Reiniciá o recargá los servidores del cliente.
   "mcpServers": {
     "teams-facultad": {
       "command": "RUTA_ABSOLUTA/.venv/bin/python",
-      "args": ["-m", "teams_facultad_mcp", "serve"]
+      "args": ["-m", "teams_facultad_mcp", "serve"],
+      "env": {"TEAMS_MCP_HEADLESS": "1"}
     }
   }
 }
@@ -120,6 +121,20 @@ usan TOML u otro formato: conservá `command`, `args` y `env` del archivo genera
 En Linux, `env` puede incluir las variables necesarias para abrir la ventana.
 Si tu cliente admite tiempos máximos, usá **30 s para iniciar** y **180 s por llamada**.
 La [guía](docs/GUIA.md#conectar-tu-asistente) amplía estos pasos.
+
+### Consultas sin ventana
+
+La configuración generada desde la versión de `main` activa
+**`TEAMS_MCP_HEADLESS=1`**: el MCP consulta Teams en segundo plano usando la sesión
+guardada. Si usás el ZIP v0.1.0 o una instalación anterior, agregá esa variable
+dentro de `env` y recargá tu cliente MCP.
+
+La ventana se usa para el ingreso inicial y MFA mediante el comando `login`.
+Si Microsoft vuelve a pedir acceso, cerrá el cliente MCP para liberar el perfil,
+ejecutá el mismo comando `login` del paso 2 en una terminal gráfica y reabrí el
+cliente. Configurá la variable solo en el cliente MCP; la terminal de ingreso
+necesita el modo visible. Para diagnosticar con una ventana, usá
+`TEAMS_MCP_HEADLESS=0` en la configuración del servidor.
 
 ## Ocho herramientas, una sesión local
 

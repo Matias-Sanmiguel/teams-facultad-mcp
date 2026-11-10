@@ -96,7 +96,7 @@ class BrowserSession:
 
     async def login(self) -> dict:
         if self.settings.headless:
-            raise AppError('modo_sin_ventana', 'Para iniciar sesión quitá TEAMS_MCP_HEADLESS y ejecutá login en una sesión gráfica.')
+            raise AppError('modo_sin_ventana', 'El MCP está en modo sin ventana. Usá una consulta para recuperar la sesión guardada. Para volver a ingresar, cerrá este cliente MCP y ejecutá login en una terminal con sesión gráfica, sin TEAMS_MCP_HEADLESS=1.')
         await self.start()
         if await self.page_state(self.page) != 'conectado':
             # Authentication continues in the visible browser after this call returns.

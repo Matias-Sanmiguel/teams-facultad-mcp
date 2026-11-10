@@ -32,3 +32,15 @@ def test_config_preserves_linux_display_for_stdio_children(monkeypatch):
     if sys.platform.startswith('linux'):
         config = json.loads(cli('config').stdout)['mcpServers']['teams-facultad']
         assert config['env']['DISPLAY'] == ':42'
+
+
+def test_generated_config_runs_mcp_headlessly_by_default(monkeypatch):
+    monkeypatch.delenv('TEAMS_MCP_HEADLESS', raising=False)
+    config = json.loads(cli('config').stdout)['mcpServers']['teams-facultad']
+    assert config['env']['TEAMS_MCP_HEADLESS'] == '1'
+
+
+def test_generated_config_preserves_explicit_visible_mode(monkeypatch):
+    monkeypatch.setenv('TEAMS_MCP_HEADLESS', '0')
+    config = json.loads(cli('config').stdout)['mcpServers']['teams-facultad']
+    assert config['env']['TEAMS_MCP_HEADLESS'] == '0'

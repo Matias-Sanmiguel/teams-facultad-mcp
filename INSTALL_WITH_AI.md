@@ -42,6 +42,8 @@ usando y probado. Ejecutá el trabajo y verificá el resultado.
    MCP local que uso. Conservá las otras entradas y hacé una copia de seguridad
    antes de editar la configuración. Usá las rutas absolutas, command, args y
    env generados para ESTA máquina; adaptá solo el formato al cliente.
+   Asegurá TEAMS_MCP_HEADLESS=1 en env para las consultas sin ventana. El ingreso
+   del paso 5 se hace en modo visible, antes de iniciar el cliente MCP.
    En Codex podés usar `codex mcp add teams-facultad ... -- COMANDO ARGUMENTOS`.
    Para clientes que admitan esos ajustes, asigná 30 segundos al inicio y
    180 segundos a las llamadas. La comunicación es local por stdio.

@@ -70,10 +70,11 @@ def main() -> int:
             create_server(settings).run(transport='stdio')
         elif args.command == 'config':
             config = {'command': str(Path(sys.executable).absolute()), 'args': ['-m', 'teams_facultad_mcp', 'serve']}
-            keys = ['TEAMS_MCP_DATA_DIR']
+            keys = ['TEAMS_MCP_DATA_DIR', 'TEAMS_MCP_HEADLESS']
             if platform.system() == 'Linux':
                 keys += ['DISPLAY', 'WAYLAND_DISPLAY', 'XDG_RUNTIME_DIR', 'XAUTHORITY']
             environment = {k: os.environ[k] for k in keys if k in os.environ}
+            environment.setdefault('TEAMS_MCP_HEADLESS', '1')
             if environment:
                 config['env'] = environment
             emit({'mcpServers': {'teams-facultad': config}})

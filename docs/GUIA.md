@@ -86,7 +86,8 @@ de tu cliente MCP. El archivo ya contiene la ruta absoluta al Python correcto:
   "mcpServers": {
     "teams-facultad": {
       "command": "RUTA_ABSOLUTA_A_ESTA_CARPETA/.venv/bin/python",
-      "args": ["-m", "teams_facultad_mcp", "serve"]
+      "args": ["-m", "teams_facultad_mcp", "serve"],
+      "env": {"TEAMS_MCP_HEADLESS": "1"}
     }
   }
 }
@@ -103,9 +104,17 @@ Python de `.venv`. En Linux conserva las variables de pantalla necesarias: algun
 clientes no las transmiten automáticamente al subproceso. No copies la configuración
 de otro alumno: la ruta y las variables se generan en cada computadora.
 
-El programa también expone `iniciar_sesion` desde el chat. La ventana se mantiene
-abierta mientras viva el servidor MCP; completá el ingreso y pedí `estado_conexion`.
-No ejecutes `login` de terminal al mismo tiempo que un MCP usa ese perfil.
+La configuración generada usa `TEAMS_MCP_HEADLESS=1` para consultar sin ventana.
+Una consulta como `listar_materias` abre el navegador oculto y recupera la sesión
+guardada, aunque `estado_conexion` inicialmente indique `sin_iniciar`.
+
+Si Microsoft pide volver a ingresar, cerrá el cliente MCP para liberar el perfil,
+ejecutá `login` desde una terminal gráfica sin esa variable activada y reabrí el
+cliente. No ejecutes `login` al mismo tiempo que otro proceso usa el perfil.
+
+Para abrir el navegador durante un diagnóstico, poné `TEAMS_MCP_HEADLESS=0` en
+`env` y recargá el servidor. En ese modo también se puede usar `iniciar_sesion`
+desde el chat: completá el ingreso y consultá `estado_conexion`.
 
 ## Herramientas
 
@@ -186,8 +195,9 @@ python -m teams_facultad_mcp doctor
 | `descarga_agotada` / `procesamiento_agotado` | El archivo excedió el tiempo o los recursos permitidos; probá descargarlo manualmente |
 | `sin_texto` | El documento puede estar vacío o escaneado; no hay OCR |
 
-`TEAMS_MCP_HEADLESS=1` se reserva para pruebas sin ventana; no permite completar
-el ingreso interactivo. Para uso normal dejá esa variable sin configurar.
+`TEAMS_MCP_HEADLESS=1` permite consultas sin ventana y es el valor predeterminado
+de la configuración generada. El ingreso interactivo se completa con el comando
+`login` en modo visible, antes de abrir el cliente MCP.
 
 ## Desarrollo y distribución
 

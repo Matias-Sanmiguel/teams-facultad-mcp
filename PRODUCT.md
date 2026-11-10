@@ -34,7 +34,7 @@ Name: Teams Facultad MCP. Spanish, approachable language for university peers. I
 
 ## Evidence on Hand
 
-Sixty automated tests, a real authenticated Teams session tested locally, synthetic browser fixtures, installers, source archive builder and GitHub Actions workflow. Public artifacts exclude private account content and browser data.
+Automated tests, a real authenticated Teams session tested locally, synthetic browser fixtures, installers, source archive builder and GitHub Actions workflow. Public artifacts exclude private account content and browser data.
 
 ## Product Principles
 

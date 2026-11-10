@@ -20,7 +20,8 @@ def main():
         result={'ok':True,'documento':extract_document(Path(sys.argv[1]),int(sys.argv[2]))}
     except AppError as exc:
         result=exc.result()
-    print(json.dumps(result,ensure_ascii=False))
+    # This pipe is a UTF-8 protocol, independent of the Windows console locale.
+    sys.stdout.buffer.write(json.dumps(result,ensure_ascii=False).encode("utf-8") + b"\n")
 
 
 if __name__=='__main__':

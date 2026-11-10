@@ -68,3 +68,17 @@ async def test_transfer_deadline_cancels_slow_file(page,tmp_path,slow_server):
     with pytest.raises(AppError,match='descarga_agotada'):
         await ui.download(file,tmp_path)
     assert state['bytes']<500000
+
+
+async def test_cancellation_at_download_event_cleans_started_transfer(page, tmp_path, slow_server):
+    url, state = slow_server
+    ui, file = await prepare_stream(page, tmp_path, url, max_bytes=1000000, timeout=5000)
+    # Cancel at the handoff from the browser event to the Python owner, before
+    # save_as starts. Waiting for bytes can miss this race on faster machines.
+    page.once('download', lambda download: task.cancel())
+    task = asyncio.create_task(ui.download(file, tmp_path))
+    with pytest.raises(asyncio.CancelledError):
+        await task
+    await asyncio.sleep(.2)
+    assert not [p for p in tmp_path.iterdir() if p.name != 'original.docx']
+    assert state['bytes'] < 500000

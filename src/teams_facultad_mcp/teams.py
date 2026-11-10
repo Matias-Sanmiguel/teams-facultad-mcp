@@ -403,15 +403,22 @@ class TeamsUI:
             pass
         if await item.count() and await item.first.is_visible():
             baseline = set(directory.rglob('*'))
-            async with self.page.expect_download(timeout=self.settings.timeout_ms) as pending:
-                await item.first.click()
-            download = await pending.value
+            async def acquire_download():
+                async with self.page.expect_download(timeout=self.settings.timeout_ms) as pending:
+                    await item.first.click()
+                return await pending.value
+
+            acquisition = asyncio.create_task(acquire_download())
+            download = task = None
             extension = Path(ref['name']).suffix.lower()
             path = directory / (secrets.token_hex(16) + extension)
-            task = asyncio.create_task(download.save_as(path))
             success = False
             deadline = asyncio.get_running_loop().time() + self.settings.timeout_ms / 1000
             try:
+                # Cancellation must not lose the browser's download at the event
+                # handoff. Join this bounded acquisition before cleaning it up.
+                download = await asyncio.shield(acquisition)
+                task = asyncio.create_task(download.save_as(path))
                 while not task.done():
                     artifacts = [p for p in directory.rglob('*') if p not in baseline and p.is_file()]
                     if max((p.stat().st_size for p in artifacts if p.exists()),default=0) > self.settings.max_file_bytes:
@@ -426,13 +433,19 @@ class TeamsUI:
                 return path, {'nombre': ref['name'], 'fuente': file_source_url(frame.url,ref['name'])}
             finally:
                 with anyio.CancelScope(shield=True):
-                    if not task.done():
+                    if download is None:
+                        with suppress(BrowserError, asyncio.CancelledError):
+                            download = await acquisition
+                    if download is not None:
+                        if not success:
+                            with suppress(BrowserError):
+                                await download.cancel()
+                        if task is not None:
+                            if not task.done():
+                                task.cancel()
+                            await asyncio.gather(task,return_exceptions=True)
                         with suppress(BrowserError):
-                            await download.cancel()
-                        task.cancel()
-                    await asyncio.gather(task,return_exceptions=True)
-                    with suppress(BrowserError):
-                        await download.delete()
+                            await download.delete()
                     if not success:
                         path.unlink(missing_ok=True)
                         # Chromium can leave a canceled .crdownload artifact until
